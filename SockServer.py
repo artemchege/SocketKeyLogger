@@ -41,7 +41,7 @@ while True:
 
     #будем писать время
     now = datetime.datetime.now()
-    current_time = now.strftime("%H:%M%:S")
+    current_time = now.strftime("%H:%M:%S")
 
     #в переменной conn находится  куча служебной информации об отправителе и получателе
     #в переменной addr находится инфа об внутреннем ip-адресе отправителя и его порт(?)
@@ -55,8 +55,11 @@ while True:
     print(data.decode(), current_time)
 
     #запишем еще все в файл на стороне сервера
-    with open("server_log.txt", "r") as w:
-        w.write(data.decode(), current_time)
+    with open("server_log.txt", "a") as w:
+        w.write(data.decode())
+        w.write(" ")
+        w.write(current_time)
+        w.write("\n")
 
     #далее мы можем обработать data и послать обратно через метод conn, который является экземпляром класса сокета
     conn.send(data.upper())
