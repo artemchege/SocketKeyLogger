@@ -1,4 +1,6 @@
 import socket
+import datatime
+import time
 
 """
 Делаем передачу файлов через сокеты по локалке.
