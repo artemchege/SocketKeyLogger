@@ -1,4 +1,6 @@
 import socket
+import time
+import datatime
 """
 Также как и на серверной стороне, здесь будут фигурировать внутренние локальные IP, которые 
 можно посмотреть в ipconfig в cmd.
