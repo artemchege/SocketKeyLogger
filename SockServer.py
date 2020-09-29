@@ -1,5 +1,5 @@
 import socket
-import datatime
+import datetime
 import time
 
 """
@@ -40,8 +40,8 @@ while True:
     conn, addr = sock.accept()
 
     #будем писать время
-    now = datatime.datatime.now()
-    current_time = now.strftime("%H:%M%S")
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M%:S")
 
     #в переменной conn находится  куча служебной информации об отправителе и получателе
     #в переменной addr находится инфа об внутреннем ip-адресе отправителя и его порт(?)
@@ -53,6 +53,10 @@ while True:
     #присланные данные можно посмотреть через принт, также их можно декодировать из байтов в строку (просто уберутся служебные символы)
     #также в decode можно указать кодировку, если получаются кракозябры
     print(data.decode(), current_time)
+
+    #запишем еще все в файл на стороне сервера
+    with open("server_log.txt", "r") as w:
+        w.write(data.decode(), current_time)
 
     #далее мы можем обработать data и послать обратно через метод conn, который является экземпляром класса сокета
     conn.send(data.upper())
