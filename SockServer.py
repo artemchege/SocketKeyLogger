@@ -35,12 +35,20 @@ def listen_udp():
     sock.close()
 
 def listen_tcp():
+    print("TCP is started")
+
+    try:
+        PORT = int(os.environ['PORT'])
+        print("Порт определен: ", PORT)
+    except Exception as e:
+        print("Произошла ошибка на этапе определения порта: ", e)
+
     #привязываем сокет к адресу и порту
-    sock.bind(('', 9090))
+    sock.bind(('0.0.0.0', PORT))
     #адрес можно оставить пустым или прописать внутренний ip адрес, но не 127.0.0.1
 
     #указываем сколько запросов может стоять в очереди
-    sock.listen(1)
+    sock.listen(5)
 
     #запускаем бесконечный цикл, можно поставить try/except на прерывание через клаву
     while True:
@@ -51,6 +59,9 @@ def listen_tcp():
         now = datetime.datetime.now()
         current_time = now.strftime("%H:%M:%S")
 
+        print("Наш conn: ", conn)
+        print("Наш addr: ", addr)
+
         #в переменной conn находится  куча служебной информации об отправителе и получателе
         #в переменной addr находится инфа об внутреннем ip-адресе отправителя и его порт(?)
         #print('conn: ', conn, "addr: ", addr)
@@ -60,7 +71,9 @@ def listen_tcp():
 
         #присланные данные можно посмотреть через принт, также их можно декодировать из байтов в строку (просто уберутся служебные символы)
         #также в decode можно указать кодировку, если получаются кракозябры
-        print(data.decode(), current_time)
+        #print(data.decode(), current_time)
+
+        print("Наша data: ", data.decode())
 
         #запишем еще все в файл на стороне сервера
         with open("server_log.txt", "a") as w:
@@ -111,7 +124,7 @@ def reversed_shell():
     conn.close()
 
 def main():
-    reversed_shell()
+    listen_tcp()
 
 if __name__ == '__main__':
     main()

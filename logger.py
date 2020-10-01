@@ -9,7 +9,7 @@ def write(key):
         f.write(keydata)
 
 
-with Listener(on_press=write) as l:
-    l.join()
+#with Listener(on_press=write) as l:
+    #l.join()
 
 
