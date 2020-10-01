@@ -1,1 +1,1 @@
-web: python SockServer.py 9090
+web: python SockServer.py
