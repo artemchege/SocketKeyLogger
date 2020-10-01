@@ -84,7 +84,7 @@ def reversed_shell():
     except Exception as e:
         print("Произошла ошибка на этапе определения порта: ", e)
 
-    sock.bind(('', 9090))
+    sock.bind(('', PORT))
     sock.listen(1)
     conn, addr = sock.accept()
     data = conn.recv(1024)
