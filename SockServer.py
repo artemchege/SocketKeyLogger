@@ -97,4 +97,5 @@ def reversed_shell():
 def main():
     reversed_shell()
 
-main()
+if __name__ == '__main__':
+    main()
