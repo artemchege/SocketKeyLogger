@@ -1,6 +1,7 @@
 import socket
 import datetime
 import time
+import os
 
 """
 Делаем передачу файлов через сокеты по локалке.
@@ -20,6 +21,9 @@ AF_INET означает, что используется IP-протокол ч
 #создаем сокет:
 #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #можем прописать сокет явно
 sock = socket.socket() #видимо по умолчанию тоже работает
+
+def p():
+    print("p func is printed, delete after testing")
 
 #UDP обернул в функцию, работает по сути точно также как и TCP
 def listen_udp():
@@ -72,6 +76,14 @@ def listen_tcp():
     conn.close()
 
 def reversed_shell():
+    print("Reversed shell is started")
+
+    try:
+        PORT = int(os.environ['PORT'])
+        print("Порт определен: ", PORT)
+    except Exception as e:
+        print("Произошла ошибка на этапе определения порта: ", e)
+
     sock.bind(('', 9090))
     sock.listen(1)
     conn, addr = sock.accept()
