@@ -17,13 +17,12 @@ AF_INET означает, что используется IP-протокол ч
 Вся передача через сокеты проходит в байтах, поэтому перед передачей любую строку надо закодировать example.encode().
 И после на стороне клиента можно декодировать example.decode() что бы получить снова строку. Decode() принимает также кодировку,
 но по умолчанию все и так работает.
+Деплой сервера происходил на linode, сервер убунту последней версии. Все команды через SSH, где сервер это ip-адрес сервера, 
+логин root, пароль в заметке в телефоне. FTP сервер тоже самое, порт 22 или пустой. SSH через PuTTy. 
 """
 #создаем сокет:
 #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #можем прописать сокет явно
 sock = socket.socket() #видимо по умолчанию тоже работает
-
-def p():
-    print("p func is printed, delete after testing")
 
 #UDP обернул в функцию, работает по сути точно также как и TCP
 def listen_udp():
@@ -37,6 +36,7 @@ def listen_udp():
 def listen_tcp():
     print("TCP is started")
 
+    #данная конструкция была нужна для хероку, там был динамический порт который можно было получить из внешнего окржуения
     try:
         PORT = int(os.environ['PORT'])
         print("Порт определен: ", PORT)
@@ -44,8 +44,9 @@ def listen_tcp():
         print("Произошла ошибка на этапе определения порта: ", e)
 
     #привязываем сокет к адресу и порту
-    sock.bind(('0.0.0.0', PORT))
+    sock.bind(('', 9090))
     #адрес можно оставить пустым или прописать внутренний ip адрес, но не 127.0.0.1
+    #если пустой то привязывается к любому свободному ip
 
     #указываем сколько запросов может стоять в очереди
     sock.listen(5)
@@ -63,7 +64,7 @@ def listen_tcp():
         print("Наш addr: ", addr)
 
         #в переменной conn находится  куча служебной информации об отправителе и получателе
-        #в переменной addr находится инфа об внутреннем ip-адресе отправителя и его порт(?)
+        #в переменной addr находится инфа об ip-адресе отправителя и его порт(?)
         #print('conn: ', conn, "addr: ", addr)
 
         #принимаем данные по 1 килобайту, зачем не знаю, работает даже если и меньше кб
@@ -76,14 +77,14 @@ def listen_tcp():
         print("Наша data: ", data.decode())
 
         #запишем еще все в файл на стороне сервера
-        with open("server_log.txt", "a") as w:
-            w.write(data.decode())
-            w.write(" ")
-            w.write(current_time)
-            w.write("\n")
+        #with open("server_log.txt", "a") as w:
+            #w.write(data.decode())
+            #w.write(" ")
+            #w.write(current_time)
+            #w.write("\n")
 
         #далее мы можем обработать data и послать обратно через метод conn, который является экземпляром класса сокета
-        #conn.send(data.upper())
+        conn.send(data.upper())
 
     #всегда закрываем коннект в конце
     conn.close()
@@ -91,17 +92,10 @@ def listen_tcp():
 def reversed_shell():
     print("Reversed shell is started")
 
-    try:
-        PORT = int(os.environ['PORT'])
-        print("Порт определен: ", PORT)
-    except Exception as e:
-        print("Произошла ошибка на этапе определения порта: ", e)
-
-    sock.bind(('0.0.0.0', PORT))
+    sock.bind(('', 9090))
     sock.listen(5)
     conn, addr = sock.accept()
 
-    print("Наш conn: ", conn)
     print("Наш addr: ", addr)
 
     data = conn.recv(1024)
@@ -123,8 +117,5 @@ def reversed_shell():
         print(data.decode("cp866"))
     conn.close()
 
-def main():
-    listen_tcp()
-
 if __name__ == '__main__':
-    main()
+    reversed_shell()

