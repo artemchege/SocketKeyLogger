@@ -22,10 +22,11 @@ AF_INET означает, что используется IP-протокол ч
 """
 #создаем сокет:
 #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #можем прописать сокет явно
-sock = socket.socket() #видимо по умолчанию тоже работает
+#sock = socket.socket() #видимо по умолчанию тоже работает
 
 #UDP обернул в функцию, работает по сути точно также как и TCP
 def listen_udp():
+    sock = socket.socket()
     # UDP слушатель
     sock.bind(('', 9090))
     result = sock.recv(1024)
@@ -34,6 +35,7 @@ def listen_udp():
     sock.close()
 
 def listen_tcp():
+    sock = socket.socket()
     print("TCP is started")
 
     #данная конструкция была нужна для хероку, там был динамический порт который можно было получить из внешнего окржуения
@@ -89,9 +91,13 @@ def listen_tcp():
     #всегда закрываем коннект в конце
     conn.close()
 
+
 def reversed_shell():
     print("Reversed shell is started")
 
+    #Создаем сокет:
+    sock = socket.socket()
+    #Привязываем сокет:
     sock.bind(('', 9090))
     sock.listen(5)
     conn, addr = sock.accept()

