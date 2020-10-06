@@ -30,7 +30,7 @@ def accept_connections():
 
     while True:
         conn, addr = sock.accept()
-        print("Новое соединение: ", addr[0])
+        print("Новое соединение: ", addr[0], ", порт: ", addr[1])
 
         conn.setblocking(1) #я не знаю что оно делает, вроде убирает таймаут, поэксперементировать
 
