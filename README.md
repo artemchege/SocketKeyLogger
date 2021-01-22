@@ -7,4 +7,4 @@ Current features:
 3. Key logging system.
 4. Complete control of cmd/bash.
 
-How to start? You must compile it to exe (for example via pyinstaller) and then run i. 
+How to start? You must compile it to exe (for example via pyinstaller) and then run it. 
